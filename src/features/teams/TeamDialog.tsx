@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { Dialog } from "@/components/Dialog";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -39,6 +40,7 @@ export function TeamDialog({ open, team, rosterSize, onClose }: Props) {
   const dispatch = useAppDispatch();
   const teams = useAppSelector(selectTeams);
   const editing = team !== null;
+  const formId = useId();
 
   const {
     register,
@@ -67,18 +69,28 @@ export function TeamDialog({ open, team, rosterSize, onClose }: Props) {
 
     if (isNameTaken(teams, values.name, team?.id)) {
       setError("name", { message: "Another team already uses that name." });
-      return;
-    }
-
-    if (editing && values.playerCount < rosterSize) {
-      setError("playerCount", {
-        message: `This team already has ${rosterSize} player${rosterSize === 1 ? "" : "s"}.`,
+      toast.error("Team name already taken", {
+        description: "Every team needs a unique name.",
       });
       return;
     }
 
-    if (team) dispatch(teamUpdated({ id: team.id, ...values }));
-    else dispatch(teamCreated(values));
+    if (editing && values.playerCount < rosterSize) {
+      const message = `This team already has ${rosterSize} player${rosterSize === 1 ? "" : "s"}.`;
+      setError("playerCount", { message });
+      toast.error("Player count too low", { description: message });
+      return;
+    }
+
+    if (team) {
+      dispatch(teamUpdated({ id: team.id, ...values }));
+      toast.success(`${values.name} updated`);
+    } else {
+      dispatch(teamCreated(values));
+      toast.success(`${values.name} created`, {
+        description: `Room for ${values.playerCount} player${values.playerCount === 1 ? "" : "s"}.`,
+      });
+    }
 
     onClose();
   });
@@ -93,41 +105,93 @@ export function TeamDialog({ open, team, rosterSize, onClose }: Props) {
           : "Create a team, then add players to it."
       }
       onClose={onClose}
+      footer={
+        <>
+          <button
+            type="button"
+            className={styles.buttonGhost}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button type="submit" form={formId} className={styles.buttonPrimary}>
+            {editing ? "Save changes" : "Create team"}
+          </button>
+        </>
+      }
     >
-      <form onSubmit={onSubmit} noValidate>
+      <form id={formId} onSubmit={onSubmit} noValidate>
         <div className={styles.formGrid}>
-          <Field label="Team name" error={errors.name?.message} htmlFor="name">
-            <input id="name" className={styles.input} autoComplete="off" {...register("name")} />
+          <Field
+            label="Team name"
+            error={errors.name?.message}
+            htmlFor={`${formId}-name`}
+          >
+            <input
+              id={`${formId}-name`}
+              className={styles.input}
+              autoComplete="off"
+              aria-invalid={errors.name ? true : undefined}
+              aria-describedby={
+                errors.name ? `${formId}-name-error` : undefined
+              }
+              {...register("name")}
+            />
           </Field>
 
-          <Field label="Player count" error={errors.playerCount?.message} htmlFor="playerCount">
+          <Field
+            label="Player count"
+            error={errors.playerCount?.message}
+            htmlFor={`${formId}-playerCount`}
+          >
             <input
-              id="playerCount"
+              id={`${formId}-playerCount`}
               className={styles.input}
               type="number"
               min={1}
               max={30}
+              aria-invalid={errors.playerCount ? true : undefined}
+              aria-describedby={
+                errors.playerCount ? `${formId}-playerCount-error` : undefined
+              }
               {...register("playerCount")}
             />
           </Field>
 
-          <Field label="Region" error={errors.region?.message} htmlFor="region">
-            <input id="region" className={styles.input} autoComplete="off" {...register("region")} />
+          <Field
+            label="Region"
+            error={errors.region?.message}
+            htmlFor={`${formId}-region`}
+          >
+            <input
+              id={`${formId}-region`}
+              className={styles.input}
+              autoComplete="off"
+              aria-invalid={errors.region ? true : undefined}
+              aria-describedby={
+                errors.region ? `${formId}-region-error` : undefined
+              }
+              {...register("region")}
+            />
           </Field>
 
-          <Field label="Country" error={errors.country?.message} htmlFor="country">
-            <input id="country" className={styles.input} autoComplete="off" {...register("country")} />
+          <Field
+            label="Country"
+            error={errors.country?.message}
+            htmlFor={`${formId}-country`}
+          >
+            <input
+              id={`${formId}-country`}
+              className={styles.input}
+              autoComplete="off"
+              aria-invalid={errors.country ? true : undefined}
+              aria-describedby={
+                errors.country ? `${formId}-country-error` : undefined
+              }
+              {...register("country")}
+            />
           </Field>
         </div>
-
-        <footer className={styles.dialogFooter}>
-          <button type="button" className={styles.buttonGhost} onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className={styles.buttonPrimary}>
-            {editing ? "Save changes" : "Create team"}
-          </button>
-        </footer>
       </form>
     </Dialog>
   );
@@ -151,7 +215,7 @@ function Field({
       </label>
       {children}
       {error ? (
-        <p className={styles.fieldError} role="alert">
+        <p id={`${htmlFor}-error`} className={styles.fieldError} role="alert">
           {error}
         </p>
       ) : null}

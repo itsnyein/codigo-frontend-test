@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import styles from "./dialog.module.scss";
 
 interface Props {
   open: boolean;
   title: string;
   description?: string;
+  footer?: ReactNode;
   onClose: () => void;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
-export function Dialog({ open, title, description, onClose, children }: Props) {
+export function Dialog({
+  open,
+  title,
+  description,
+  footer,
+  onClose,
+  children,
+}: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   useEffect(() => {
     const element = ref.current;
@@ -26,7 +36,8 @@ export function Dialog({ open, title, description, onClose, children }: Props) {
     <dialog
       ref={ref}
       className={styles.dialog}
-      aria-labelledby="dialog-title"
+      aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -37,14 +48,19 @@ export function Dialog({ open, title, description, onClose, children }: Props) {
     >
       <div className={styles.panel}>
         <header className={styles.header}>
-          <h2 id="dialog-title" className={styles.title}>
+          <h2 id={titleId} className={styles.title}>
             {title}
           </h2>
           {description ? (
-            <p className={styles.description}>{description}</p>
+            <p id={descriptionId} className={styles.description}>
+              {description}
+            </p>
           ) : null}
         </header>
-        {children}
+
+        {children ? <div className={styles.body}>{children}</div> : null}
+
+        {footer ? <footer className={styles.footer}>{footer}</footer> : null}
       </div>
     </dialog>
   );

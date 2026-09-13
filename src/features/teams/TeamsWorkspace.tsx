@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Dialog } from "@/components/Dialog";
 import { PlayerList } from "@/features/players/PlayerList";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -41,7 +42,16 @@ export function TeamsWorkspace() {
   };
 
   const confirmDelete = () => {
-    if (pendingDelete) dispatch(teamDeleted(pendingDelete.id));
+    if (pendingDelete) {
+      const released = rosters.get(pendingDelete.id)?.length ?? 0;
+      dispatch(teamDeleted(pendingDelete.id));
+      toast.success(`${pendingDelete.name} deleted`, {
+        description:
+          released === 0
+            ? undefined
+            : `${released} player${released === 1 ? "" : "s"} released back to the list.`,
+      });
+    }
     setPendingDelete(null);
   };
 
@@ -59,7 +69,11 @@ export function TeamsWorkspace() {
                 : `${teams.length} team${teams.length === 1 ? "" : "s"}`}
             </p>
           </div>
-          <button type="button" className={styles.buttonPrimary} onClick={openCreate}>
+          <button
+            type="button"
+            className={styles.buttonPrimary}
+            onClick={openCreate}
+          >
             New team
           </button>
         </header>
@@ -101,7 +115,13 @@ export function TeamsWorkspace() {
                           <button
                             type="button"
                             className={styles.buttonGhostSmall}
-                            onClick={() => dispatch(playerUnassigned(player.id))}
+                            onClick={() => {
+                              dispatch(playerUnassigned(player.id));
+                              toast.success(
+                                `${player.firstName} ${player.lastName} removed`,
+                                { description: `No longer on ${team.name}.` },
+                              );
+                            }}
                           >
                             Remove
                           </button>
@@ -111,7 +131,11 @@ export function TeamsWorkspace() {
                   )}
 
                   <footer className={styles.teamActions}>
-                    <button type="button" className={styles.buttonGhostSmall} onClick={() => openEdit(team)}>
+                    <button
+                      type="button"
+                      className={styles.buttonGhostSmall}
+                      onClick={() => openEdit(team)}
+                    >
                       Edit
                     </button>
                     <button
@@ -143,16 +167,25 @@ export function TeamsWorkspace() {
         title={`Delete ${pendingDelete?.name ?? "team"}?`}
         description="Its players go back to the available list. This cannot be undone."
         onClose={() => setPendingDelete(null)}
-      >
-        <footer className={styles.dialogFooter}>
-          <button type="button" className={styles.buttonGhost} onClick={() => setPendingDelete(null)}>
-            Cancel
-          </button>
-          <button type="button" className={styles.buttonDanger} onClick={confirmDelete}>
-            Delete team
-          </button>
-        </footer>
-      </Dialog>
+        footer={
+          <>
+            <button
+              type="button"
+              className={styles.buttonGhost}
+              onClick={() => setPendingDelete(null)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={styles.buttonDanger}
+              onClick={confirmDelete}
+            >
+              Delete team
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }
