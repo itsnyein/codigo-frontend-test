@@ -1,0 +1,81 @@
+@use "breakpoints" as *;
+
+.main {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-surface-muted);
+}
+
+.panel {
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.code {
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.title {
+  margin-top: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.body {
+  margin-top: var(--space-2);
+  color: var(--color-ink-muted);
+  font-size: var(--text-base);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.primary,
+.ghost {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.primary {
+  border: 1px solid var(--color-brand);
+  background: var(--color-brand);
+  color: var(--color-surface);
+
+  &:hover {
+    background: var(--color-brand-strong);
+  }
+}
+
+.ghost {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-ink);
+
+  &:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+}

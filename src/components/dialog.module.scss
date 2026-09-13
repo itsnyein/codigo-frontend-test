@@ -1,0 +1,39 @@
+@use "breakpoints" as *;
+
+.dialog {
+  margin: auto;
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 3rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  color: inherit;
+
+  &::backdrop {
+    background: rgb(18 23 43 / 45%);
+    backdrop-filter: blur(1px);
+  }
+}
+
+.panel {
+  padding: var(--space-5);
+}
+
+.header {
+  margin-bottom: var(--space-5);
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.description {
+  margin-top: var(--space-1);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+}

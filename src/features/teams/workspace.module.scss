@@ -1,0 +1,343 @@
+@use "breakpoints" as *;
+
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+
+  @include from(desktop) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.column {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.columnHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.columnTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.columnMeta {
+  margin-top: 2px;
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+}
+
+.buttonPrimary,
+.buttonGhost,
+.buttonDanger,
+.buttonGhostSmall,
+.buttonDangerSmall {
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.buttonPrimary {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-brand);
+  background: var(--color-brand);
+  color: var(--color-surface);
+
+  &:hover {
+    background: var(--color-brand-strong);
+    border-color: var(--color-brand-strong);
+  }
+}
+
+.buttonGhost,
+.buttonGhostSmall {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-ink);
+
+  &:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+}
+
+.buttonGhost {
+  padding: var(--space-2) var(--space-4);
+}
+
+.buttonGhostSmall,
+.buttonDangerSmall {
+  padding: 4px var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.buttonDanger {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-surface);
+
+  &:hover {
+    filter: brightness(0.94);
+  }
+}
+
+.buttonDangerSmall {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-danger);
+
+  &:hover {
+    border-color: var(--color-danger);
+    background: var(--color-danger-soft);
+  }
+}
+
+.teamList,
+.roster,
+.playerList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teamList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.teamCard {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.teamTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.teamName {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.teamMeta,
+.playerMeta {
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+}
+
+.badge {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.roster {
+  margin-top: var(--space-3);
+  display: grid;
+  gap: 2px;
+}
+
+.rosterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.rosterEmpty {
+  margin-top: var(--space-3);
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+}
+
+.teamActions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.playerInfo {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.playerName {
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+
+.assignedTag {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.assignLabel {
+  display: inline-flex;
+}
+
+.select {
+  padding: 4px var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+
+.sentinel {
+  padding: var(--space-4) 0;
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.skeletonRow {
+  height: 44px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-muted) 25%,
+    var(--color-border) 37%,
+    var(--color-surface-muted) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.emptyTitle {
+  font-weight: 600;
+}
+
+.emptyBody {
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-4);
+
+  @include from(tablet) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+
+  &:focus-visible {
+    border-color: var(--color-brand);
+  }
+}
+
+.fieldError {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.dialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.pageStatus {
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.buttonGhostSmall:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  color: var(--color-ink-subtle);
+}
