@@ -18,6 +18,9 @@
   margin-left: calc(var(--object-w) * var(--object-scale, 1) / -2);
   margin-top: calc(var(--object-h) * var(--object-scale, 1) / -2);
   transform: var(--idle, none) rotate(var(--object-rotate));
+}
+
+.object[data-idle] {
   will-change: transform;
 }
 

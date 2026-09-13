@@ -17,8 +17,15 @@ export function useTextWave(
     );
     if (chars.length === 0) return;
 
-    const fontSize = parseFloat(getComputedStyle(chars[0]!).fontSize) || 16;
-    const amplitude = fontSize * TEXT_WAVE.amplitudeEm;
+    const measure = () =>
+      (parseFloat(getComputedStyle(chars[0]!).fontSize) || 16) *
+      TEXT_WAVE.amplitudeEm;
+
+    let amplitude = measure();
+    const onResize = () => {
+      amplitude = measure();
+    };
+    window.addEventListener("resize", onResize);
 
     let frame = 0;
     const started = performance.now();
@@ -35,6 +42,9 @@ export function useTextWave(
     };
 
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", onResize);
+    };
   }, [root, active, reduced]);
 }
