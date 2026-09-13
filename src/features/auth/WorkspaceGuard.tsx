@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectIsHydrated } from "@/store/hydration";
+import { Dialog } from "@/components/Dialog";
 import { TeamsWorkspace } from "@/features/teams/TeamsWorkspace";
 import { loggedOut, selectUsername } from "./authSlice";
 import styles from "./auth.module.scss";
@@ -14,6 +15,7 @@ export function WorkspaceGuard() {
   const username = useAppSelector(selectUsername);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
 
   useEffect(() => {
     if (hydrated && username === null) router.replace("/login");
@@ -46,12 +48,7 @@ export function WorkspaceGuard() {
           <button
             type="button"
             className={styles.logout}
-            onClick={() => {
-              dispatch(loggedOut());
-              toast.success("Signed out", {
-                description: "Your teams stay saved on this device.",
-              });
-            }}
+            onClick={() => setConfirmingLogout(true)}
           >
             <svg
               className={styles.logoutIcon}
@@ -75,6 +72,37 @@ export function WorkspaceGuard() {
       <main className={styles.workspace}>
         <TeamsWorkspace />
       </main>
+
+      <Dialog
+        open={confirmingLogout}
+        title="Log out?"
+        description="Your teams stay saved on this device, so they will be here when you sign back in."
+        onClose={() => setConfirmingLogout(false)}
+        footer={
+          <>
+            <button
+              type="button"
+              className={styles.dialogCancel}
+              onClick={() => setConfirmingLogout(false)}
+            >
+              Stay signed in
+            </button>
+            <button
+              type="button"
+              className={styles.dialogConfirm}
+              onClick={() => {
+                setConfirmingLogout(false);
+                dispatch(loggedOut());
+                toast.success("Signed out", {
+                  description: "Your teams stay saved on this device.",
+                });
+              }}
+            >
+              Log out
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }
