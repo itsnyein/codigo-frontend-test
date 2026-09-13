@@ -21,7 +21,11 @@ export function Scene({
   if (placements.length === 0) return null;
 
   return (
-    <div className={styles.scene} aria-hidden="true">
+    <div
+      className={styles.scene}
+      data-crowd={state === 0 ? true : undefined}
+      aria-hidden="true"
+    >
       {state === 0 ? (
         <span className={styles.crowdBackdrop} data-backdrop />
       ) : null}
@@ -45,6 +49,8 @@ export function Scene({
               {
                 "--object-x": `${placement.x}%`,
                 "--object-y": `${placement.y}%`,
+                "--object-xm": `${placement.mx}%`,
+                "--object-ym": `${placement.my}%`,
                 "--object-w": `${placement.size}vw`,
                 "--object-h": `${placementHeight(placement).toFixed(2)}vw`,
                 "--object-rotate": `${placement.rotate.toFixed(1)}deg`,

@@ -5,7 +5,7 @@ export const LOCK_TAIL_MS = 200;
 export const TYPEWRITER = {
   stagger: 0.07,
   charDuration: 0.12,
-  riseFrom: 4,
+  riseFromEm: 0.96,
   exitOpacity: 0.2,
   exitDuration: 0.2,
   paragraphGap: 1.2,
@@ -30,7 +30,7 @@ export const T_WORDMARK_TO_STANDING = {
 } as const;
 
 export const TEXT_WAVE = {
-  amplitude: 5,
+  amplitudeEm: 0.22,
   phasePerChar: 0.9,
   period: 2.4,
 } as const;

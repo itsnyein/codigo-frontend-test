@@ -197,7 +197,7 @@ export function useSceneDirector({
 
           tl.fromTo(
             chars,
-            { autoAlpha: 0, "--rise": `${TYPEWRITER.riseFrom}px` },
+            { autoAlpha: 0, "--rise": `${TYPEWRITER.riseFromEm}em` },
             {
               autoAlpha: 1,
               "--rise": "0px",

@@ -56,6 +56,8 @@ export interface Placement {
   palette: Palette;
   x: number;
   y: number;
+  mx: number;
+  my: number;
   size: number;
   rotate: number;
   band: BandName;
@@ -81,6 +83,8 @@ interface Seed {
   tone: Tone;
   x: number;
   y: number;
+  mx?: number;
+  my?: number;
   size: number;
   rotate: number;
   band: BandName;
@@ -98,6 +102,8 @@ function place(seed: Seed, index: number): Placement {
     palette: paletteFor(seed.fur, seed.tone),
     x: round(seed.x),
     y: round(seed.y),
+    mx: round(seed.mx ?? seed.x),
+    my: round(seed.my ?? seed.y),
     size: round(seed.size),
     rotate: round(seed.rotate),
     band: seed.band,
@@ -176,6 +182,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "soft",
     x: 62,
     y: 16,
+    mx: 18,
+    my: 42,
     size: 9,
     rotate: -6,
     band: "far",
@@ -187,6 +195,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "pale",
     x: 84,
     y: 24,
+    mx: 82,
+    my: 44,
     size: 10,
     rotate: 8,
     band: "far",
@@ -198,6 +208,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "soft",
     x: 33,
     y: 14,
+    mx: 48,
+    my: 38,
     size: 9,
     rotate: -10,
     band: "far",
@@ -210,6 +222,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "pale",
     x: 95,
     y: 70,
+    mx: 90,
+    my: 60,
     size: 10,
     rotate: 5,
     band: "far",
@@ -222,6 +236,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 62,
     y: 86,
+    mx: 28,
+    my: 57,
     size: 15,
     rotate: -8,
     band: "mid",
@@ -233,6 +249,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 47,
     y: 72,
+    mx: 70,
+    my: 64,
     size: 14,
     rotate: 7,
     band: "mid",
@@ -244,6 +262,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "soft",
     x: 88,
     y: 76,
+    mx: 10,
+    my: 68,
     size: 15,
     rotate: -12,
     band: "mid",
@@ -255,6 +275,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "soft",
     x: 22,
     y: 24,
+    mx: 86,
+    my: 76,
     size: 13,
     rotate: 9,
     band: "mid",
@@ -268,6 +290,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 40,
     y: 95,
+    mx: 24,
+    my: 93,
     size: 22,
     rotate: -5,
     band: "near",
@@ -279,6 +303,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 68,
     y: 99,
+    mx: 64,
+    my: 96,
     size: 21,
     rotate: 6,
     band: "near",
@@ -290,6 +316,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 95,
     y: 94,
+    mx: 96,
+    my: 88,
     size: 23,
     rotate: -9,
     band: "near",
@@ -301,6 +329,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     tone: "vivid",
     x: 14,
     y: 97,
+    mx: 4,
+    my: 86,
     size: 20,
     rotate: 11,
     band: "near",

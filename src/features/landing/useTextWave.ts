@@ -17,6 +17,9 @@ export function useTextWave(
     );
     if (chars.length === 0) return;
 
+    const fontSize = parseFloat(getComputedStyle(chars[0]!).fontSize) || 16;
+    const amplitude = fontSize * TEXT_WAVE.amplitudeEm;
+
     let frame = 0;
     const started = performance.now();
 
@@ -24,8 +27,7 @@ export function useTextWave(
       const t = ((now - started) / 1000 / TEXT_WAVE.period) * Math.PI * 2;
 
       for (let i = 0; i < chars.length; i += 1) {
-        const offset =
-          Math.sin(t + i * TEXT_WAVE.phasePerChar) * TEXT_WAVE.amplitude;
+        const offset = Math.sin(t + i * TEXT_WAVE.phasePerChar) * amplitude;
         chars[i]!.style.setProperty("--wave", `${offset.toFixed(2)}px`);
       }
 

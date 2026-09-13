@@ -90,10 +90,11 @@
   top: 34.5%;
   width: 60vw;
   color: var(--copy-ink);
-  font-size: clamp(0.75rem, 1.6vw, 1.6rem);
+  font-size: min(1.6vw, 24px);
   font-weight: 700;
   letter-spacing: 1.3em;
-  line-height: 2;
+  line-height: 2em;
+  z-index: 50;
   text-shadow:
     #ffffff -1px -1px 0,
     #ffffff -1px 0 0,
@@ -121,6 +122,7 @@
   position: absolute;
   top: 6.9%;
   left: 2.8%;
+  z-index: 55;
 }
 
 .headerLogo {
@@ -141,8 +143,9 @@
   position: absolute;
   top: 90.3%;
   left: 2.8%;
+  z-index: 55;
   display: flex;
-  gap: 1.15vw;
+  gap: min(3.5vw, 20px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -151,8 +154,8 @@
 .social {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: min(10vw, 40px);
+  height: min(10vw, 40px);
   border-radius: 999px;
   background: var(--navy);
   color: #ffffff;
@@ -161,8 +164,8 @@
     background-color 0.15s ease-out;
 
   svg {
-    width: 22px;
-    height: 22px;
+    width: min(5.5vw, 22px);
+    height: min(5.5vw, 22px);
     display: block;
   }
 
@@ -176,9 +179,10 @@
   position: absolute;
   right: 0;
   bottom: 0;
+  z-index: 55;
   display: grid;
   place-items: center;
-  padding: 0 3.2% 4.4% 0;
+  padding: 0 0.6% 2% 0;
   text-decoration: none;
 }
 
@@ -213,7 +217,7 @@
   gap: 1.6rem;
   justify-items: center;
   background: #ffffff;
-  z-index: 40;
+  z-index: 60;
 
   &[data-ready="true"] {
     display: none;
@@ -246,19 +250,42 @@
   }
 }
 
-@include until(tablet) {
+@media (max-width: 950px) {
   .wordmark {
     width: 88vw;
-    font-size: clamp(2.2rem, 12vw, 4rem);
+    font-size: clamp(2.2rem, 13.4vw, 8rem);
   }
 
   .copy {
-    left: 6%;
-    top: auto;
-    bottom: 24%;
-    max-width: 88vw;
-    font-size: 13px;
-    letter-spacing: 0.26em;
+    left: 10%;
+    top: 15%;
+    width: 90vw;
+    font-size: 3vw;
+    letter-spacing: 1.9vw;
+    line-height: 7vw;
+  }
+
+  .headerLogo {
+    font-size: 6.4vw;
+  }
+
+  .header {
+    top: 3.8%;
+    left: 5.3%;
+  }
+
+  .socials {
+    top: 92.4%;
+    left: 5.3%;
+  }
+
+  .cta {
+    padding: 0 5% 4% 0;
+  }
+
+  .ctaShape {
+    width: 34vw;
+    height: 34vw;
   }
 }
 
