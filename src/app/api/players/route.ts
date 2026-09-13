@@ -20,6 +20,14 @@ const upstreamSchema = z.object({
 
 const cursorSchema = z.coerce.number().int().min(0).catch(0);
 
+class RateLimited extends Error {
+  constructor(readonly retryAfterSeconds: number) {
+    super("rate limited");
+  }
+}
+
+const MAX_RETRY_WAIT_SECONDS = 2;
+
 export async function GET(request: NextRequest): Promise<Response> {
   const cursor = cursorSchema.parse(
     request.nextUrl.searchParams.get("cursor") ?? 0,
@@ -32,7 +40,19 @@ export async function GET(request: NextRequest): Promise<Response> {
       : readFixture(cursor);
 
     return Response.json(page satisfies PlayersPage);
-  } catch {
+  } catch (error) {
+    if (error instanceof RateLimited) {
+      return Response.json(
+        {
+          error: `The players API allows 5 requests per minute. Try again in about ${error.retryAfterSeconds}s.`,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(error.retryAfterSeconds) },
+        },
+      );
+    }
+
     return Response.json(
       { error: "Could not load players right now." },
       { status: 502 },
@@ -51,10 +71,26 @@ async function fetchUpstream(
   );
   if (cursor > 0) url.searchParams.set("cursor", String(cursor));
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     headers: { Authorization: apiKey },
     next: { revalidate: 3600 },
   });
+
+  if (response.status === 429) {
+    const header = Number(response.headers.get("retry-after"));
+    const wait = Number.isFinite(header) && header > 0 ? header : 1.2;
+
+    if (wait > MAX_RETRY_WAIT_SECONDS) throw new RateLimited(Math.ceil(wait));
+
+    await new Promise((resolve) => setTimeout(resolve, wait * 1000));
+
+    response = await fetch(url, {
+      headers: { Authorization: apiKey },
+      next: { revalidate: 3600 },
+    });
+
+    if (response.status === 429) throw new RateLimited(Math.ceil(wait));
+  }
 
   if (!response.ok) throw new Error(`Upstream responded ${response.status}`);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { publicEnv } from "@/lib/env.public";
@@ -34,7 +34,7 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
   const error = useAppSelector(selectPlayersError);
   const hasMore = useAppSelector(selectHasMore);
 
-  const [page, setPage] = useState(0);
+  const loading = status === "loading";
 
   const fetchMore = useCallback(() => {
     void dispatch(loadPlayers());
@@ -44,35 +44,21 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
     if (players.length === 0) fetchMore();
   }, [players.length, fetchMore]);
 
-  const pageCount = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
-  const visible = players.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
-  const loading = status === "loading";
-
-  const goNext = async () => {
-    const nextPage = page + 1;
-
-    if (nextPage < pageCount) {
-      setPage(nextPage);
-      return;
-    }
-
-    if (!hasMore) return;
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
 
     try {
       await dispatch(loadPlayers()).unwrap();
-      setPage(nextPage);
-    } catch {
-      toast.error("Couldn't load more players", {
-        description: "Check your connection, then try again.",
-      });
+    } catch (reason) {
+      toast.error(
+        typeof reason === "string" ? reason : "Couldn't load more players",
+      );
     }
   };
 
   const teamsWithSpace = teams.filter(
     (team) => (rosters.get(team.id)?.length ?? 0) < team.playerCount,
   );
-
-  const canGoNext = page + 1 < pageCount || hasMore;
 
   return (
     <section className={styles.column} aria-labelledby="players-heading">
@@ -82,9 +68,7 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
             Players
           </h2>
           <p className={styles.columnMeta}>
-            {players.length === 0
-              ? "Loading…"
-              : `Page ${page + 1} of ${pageCount}${hasMore ? "+" : ""} · ${players.length} loaded`}
+            {players.length === 0 ? "Loading…" : `${players.length} loaded`}
           </p>
         </div>
       </header>
@@ -124,9 +108,9 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
         </ul>
       ) : null}
 
-      {visible.length > 0 ? (
+      {players.length > 0 ? (
         <ul className={styles.playerList}>
-          {visible.map((player) => {
+          {players.map((player) => {
             const assignment = assignments[player.id];
             const team = assignment
               ? teams.find((candidate) => candidate.id === assignment.teamId)
@@ -189,29 +173,22 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
       ) : null}
 
       {players.length > 0 ? (
-        <nav className={styles.pagination} aria-label="Player pages">
-          <button
-            type="button"
-            className={styles.buttonGhostSmall}
-            onClick={() => setPage((current) => Math.max(0, current - 1))}
-            disabled={page === 0}
-          >
-            Previous
-          </button>
-          <span className={styles.pageStatus}>
-            {loading
-              ? "Loading…"
-              : `${page + 1} / ${pageCount}${hasMore ? "+" : ""}`}
-          </span>
-          <button
-            type="button"
-            className={styles.buttonGhostSmall}
-            onClick={goNext}
-            disabled={!canGoNext || loading}
-          >
-            Next
-          </button>
-        </nav>
+        <div className={styles.loadMore}>
+          {hasMore ? (
+            <button
+              type="button"
+              className={styles.buttonGhostSmall}
+              onClick={loadMore}
+              disabled={loading}
+            >
+              {loading ? "Loading…" : "Load more"}
+            </button>
+          ) : (
+            <span className={styles.pageStatus}>
+              All {players.length} players loaded
+            </span>
+          )}
+        </div>
       ) : null}
     </section>
   );

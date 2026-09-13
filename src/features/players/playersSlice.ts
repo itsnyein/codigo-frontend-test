@@ -29,7 +29,12 @@ export const loadPlayers = createAsyncThunk<
     const response = await fetch(`/api/players?cursor=${cursor}`, { signal });
 
     if (!response.ok) {
-      return rejectWithValue("We couldn't load players. Please try again.");
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      return rejectWithValue(
+        body?.error ?? "We couldn't load players. Please try again.",
+      );
     }
     return (await response.json()) as PlayersPage;
   },
@@ -60,7 +65,7 @@ export const playersSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(loadPlayers.rejected, (state, action) => {
-        if (action.meta.aborted) return;
+        if (action.meta.aborted || action.meta.condition) return;
         state.status = "failed";
         state.error = action.payload ?? "Something went wrong.";
       });
