@@ -1,0 +1,122 @@
+@use "breakpoints" as *;
+
+.main {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--space-7) var(--space-4);
+  background: var(--color-surface-muted);
+}
+
+.inner {
+  width: 100%;
+  max-width: 56rem;
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.eyebrow {
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+.lead {
+  margin-top: var(--space-2);
+  max-width: 40ch;
+  color: var(--color-ink-muted);
+}
+
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include from(tablet) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.cardEyebrow {
+  color: var(--color-ink-subtle);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  margin-top: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.cardBody {
+  margin-top: var(--space-2);
+  color: var(--color-ink-muted);
+  font-size: var(--text-base);
+}
+
+.points {
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+  list-style: none;
+}
+
+.point {
+  position: relative;
+  padding-left: var(--space-4);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+  }
+}
+
+.cardAction {
+  margin-top: var(--space-5);
+  color: var(--color-brand);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
