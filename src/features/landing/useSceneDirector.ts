@@ -4,14 +4,13 @@ import { useRef, type PointerEvent, type RefObject } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
-  HOVER,
   LOCK_TAIL_MS,
   TYPEWRITER,
   T_CROWD_TO_WORDMARK,
   T_WORDMARK_TO_STANDING,
-  WHEEL_DECAY,
-  WHEEL_FIRE_PX,
 } from "./motion";
+import { createGestureReader } from "./gesture";
+import { hoverIn, hoverOut } from "./hoverRig";
 
 gsap.registerPlugin(useGSAP);
 
@@ -19,19 +18,17 @@ interface Options {
   root: RefObject<HTMLElement | null>;
   sceneCount: number;
   onStateChange: (index: number) => void;
+  onPoseChange: (index: number) => void;
 }
 
-/**
- * A state director, not a scrubbed timeline: one wheel or swipe gesture
- * advances exactly one state and plays a locked choreography. Input during a
- * transition is discarded, which is what makes the reference's pacing feel
- * deliberate rather than elastic.
- *
- * Each transition is built as a single master timeline with the position
- * offsets Fable measured, so reverse is literally the same timeline played
- * backwards - not a second, differently-shaped animation.
- */
-export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
+const HERO_POSE_AT = [0.25, 0.1];
+
+export function useSceneDirector({
+  root,
+  sceneCount,
+  onStateChange,
+  onPoseChange,
+}: Options) {
   const state = useRef(0);
   const locked = useRef(false);
 
@@ -50,6 +47,11 @@ export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
       const objectsOf = (i: number) =>
         gsap.utils.toArray<HTMLElement>(
           `[data-layer="${i}"] [data-object]`,
+          rootEl,
+        );
+      const paragraphsOf = (i: number) =>
+        gsap.utils.toArray<HTMLElement>(
+          `[data-copy="${i}"] [data-paragraph]`,
           rootEl,
         );
       const charsOf = (i: number) =>
@@ -169,24 +171,72 @@ export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
               stagger: t.animalsIn.stagger,
             },
             "<",
-          )
-          .fromTo(
-            charsOf(2),
-            { autoAlpha: 0, y: TYPEWRITER.riseFrom },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: TYPEWRITER.charDuration,
-              ease: "power2.out",
-              stagger: TYPEWRITER.stagger,
-            },
-            t.typewriter.at,
           );
 
         return tl;
       };
 
-      const timelines = [crowdToWordmark(), wordmarkToStanding()];
+      let copyTl: gsap.core.Timeline | null = null;
+
+      const copyBlockOf = (i: number) =>
+        rootEl.querySelector<HTMLElement>(`[data-copy="${i}"]`);
+
+      const typeCopy = (index: number) => {
+        copyTl?.kill();
+        const block = copyBlockOf(index);
+        if (block) gsap.set(block, { visibility: "visible" });
+        const tl = gsap.timeline({ delay: t2.typewriter.startAt });
+        let cursor = 0;
+
+        for (const paragraph of paragraphsOf(index)) {
+          const chars = gsap.utils.toArray<HTMLElement>(
+            "[data-char]",
+            paragraph,
+          );
+          if (chars.length === 0) continue;
+
+          tl.fromTo(
+            chars,
+            { autoAlpha: 0, "--rise": `${TYPEWRITER.riseFrom}px` },
+            {
+              autoAlpha: 1,
+              "--rise": "0px",
+              duration: TYPEWRITER.charDuration,
+              ease: "power2.out",
+              stagger: TYPEWRITER.stagger,
+            },
+            cursor,
+          );
+          cursor +=
+            chars.length * TYPEWRITER.stagger +
+            TYPEWRITER.charDuration +
+            TYPEWRITER.paragraphGap;
+        }
+
+        copyTl = tl;
+      };
+
+      const dimCopy = (index: number) => {
+        copyTl?.kill();
+        copyTl = null;
+        const block = copyBlockOf(index);
+
+        gsap.to(charsOf(index), {
+          autoAlpha: TYPEWRITER.exitOpacity,
+          duration: TYPEWRITER.exitDuration,
+          overwrite: true,
+          onComplete: () => {
+            if (block) gsap.set(block, { visibility: "hidden" });
+          },
+        });
+      };
+
+      const t2 = T_WORDMARK_TO_STANDING;
+      const timelines = [
+        { tl: crowdToWordmark(), total: T_CROWD_TO_WORDMARK.total },
+        { tl: wordmarkToStanding(), total: T_WORDMARK_TO_STANDING.total },
+      ];
+      const gesture = createGestureReader();
 
       const go = (to: number) => {
         if (locked.current) return;
@@ -194,55 +244,42 @@ export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
 
         const from = state.current;
         const forward = to > from;
-        const tl = timelines[forward ? from : to];
-        if (!tl) return;
+        const entry = timelines[forward ? from : to];
+        if (!entry) return;
+        const { tl, total } = entry;
 
         locked.current = true;
+        gesture.disarm();
         state.current = to;
         onStateChange(to);
 
+        const poseAt = HERO_POSE_AT[Math.min(from, to)] ?? 0;
+        gsap.delayedCall(reduced ? poseAt * 0.6 : poseAt, () =>
+          onPoseChange(to),
+        );
+
         if (reduced) tl.timeScale(1 / 0.6);
 
-        const unlock = () => {
-          gsap.delayedCall(LOCK_TAIL_MS / 1000, () => {
-            locked.current = false;
-          });
-        };
+        const lockFor = (reduced ? total * 0.6 : total) + LOCK_TAIL_MS / 1000;
+        gsap.delayedCall(lockFor, () => {
+          locked.current = false;
+        });
 
         if (forward) {
-          tl.eventCallback("onComplete", unlock);
-          tl.eventCallback("onReverseComplete", null);
           tl.play();
+          typeCopy(to);
         } else {
-          gsap.to(charsOf(from), {
-            autoAlpha: TYPEWRITER.exitOpacity,
-            duration: TYPEWRITER.exitDuration,
-            overwrite: true,
-          });
-          tl.eventCallback("onReverseComplete", unlock);
-          tl.eventCallback("onComplete", null);
+          dimCopy(from);
           tl.reverse();
         }
       };
 
-      let accumulated = 0;
-      let decayFrame = 0;
-
-      const decay = () => {
-        accumulated *= WHEEL_DECAY;
-        decayFrame = requestAnimationFrame(decay);
-      };
-      decayFrame = requestAnimationFrame(decay);
-
       const onWheel = (event: WheelEvent) => {
         event.preventDefault();
-        if (locked.current) return;
 
-        accumulated += event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
-        if (Math.abs(accumulated) < WHEEL_FIRE_PX) return;
+        const direction = gesture.read(event, event.timeStamp);
+        if (locked.current || direction === 0) return;
 
-        const direction = accumulated > 0 ? 1 : -1;
-        accumulated = 0;
         go(state.current + direction);
       };
 
@@ -273,7 +310,6 @@ export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
       window.addEventListener("touchend", onTouchEnd);
 
       return () => {
-        cancelAnimationFrame(decayFrame);
         window.removeEventListener("wheel", onWheel);
         window.removeEventListener("keydown", onKeyDown);
         window.removeEventListener("touchstart", onTouchStart);
@@ -284,25 +320,11 @@ export function useSceneDirector({ root, sceneCount, onStateChange }: Options) {
   );
 
   const onObjectEnter = contextSafe((event: PointerEvent<HTMLElement>) => {
-    const target = event.currentTarget.querySelector("[data-hover]");
-    if (!target) return;
-    gsap.to(target, {
-      scale: HOVER.scale,
-      duration: HOVER.inSeconds,
-      ease: HOVER.easeIn,
-      overwrite: true,
-    });
+    hoverIn(event.currentTarget);
   });
 
   const onObjectLeave = contextSafe((event: PointerEvent<HTMLElement>) => {
-    const target = event.currentTarget.querySelector("[data-hover]");
-    if (!target) return;
-    gsap.to(target, {
-      scale: 1,
-      duration: HOVER.outSeconds,
-      ease: HOVER.easeOut,
-      overwrite: true,
-    });
+    hoverOut(event.currentTarget);
   });
 
   return { onObjectEnter, onObjectLeave };

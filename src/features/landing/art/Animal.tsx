@@ -13,6 +13,18 @@ export const SPECIES: readonly Species[] = [
 
 export const ANIMAL_ASPECT = 200 / 260;
 
+export const PART_ORIGIN: Record<string, string> = {
+  tail: "150 148",
+  legL: "78 206",
+  legR: "122 206",
+  armL: "56 150",
+  armR: "144 150",
+  body: "100 178",
+  head: "100 92",
+  earL: "62 46",
+  earR: "138 46",
+};
+
 interface EarShape {
   left: string;
   right: string;
@@ -118,6 +130,7 @@ export function Animal({
 
       <g data-part={part("legL")} style={{ transformOrigin: "78px 206px" }}>
         <rect
+          transform="rotate(-5 78 206)"
           x="60"
           y="200"
           width="36"
@@ -127,11 +140,19 @@ export function Animal({
           stroke={palette.ink}
           strokeWidth="4"
         />
-        <ellipse cx="78" cy="244" rx="15" ry="10" fill={palette.inner} />
+        <ellipse
+          transform="rotate(-5 78 206)"
+          cx="78"
+          cy="244"
+          rx="15"
+          ry="10"
+          fill={palette.inner}
+        />
       </g>
 
       <g data-part={part("legR")} style={{ transformOrigin: "122px 206px" }}>
         <rect
+          transform="rotate(5 122 206)"
           x="104"
           y="200"
           width="36"
@@ -141,11 +162,19 @@ export function Animal({
           stroke={palette.ink}
           strokeWidth="4"
         />
-        <ellipse cx="122" cy="244" rx="15" ry="10" fill={palette.inner} />
+        <ellipse
+          transform="rotate(5 122 206)"
+          cx="122"
+          cy="244"
+          rx="15"
+          ry="10"
+          fill={palette.inner}
+        />
       </g>
 
       <g data-part={part("armL")} style={{ transformOrigin: "56px 150px" }}>
         <rect
+          transform="rotate(-28 56 150)"
           x="20"
           y="142"
           width="52"
@@ -156,6 +185,7 @@ export function Animal({
           strokeWidth="4"
         />
         <circle
+          transform="rotate(-28 56 150)"
           cx="30"
           cy="158"
           r="13"
@@ -167,6 +197,7 @@ export function Animal({
 
       <g data-part={part("armR")} style={{ transformOrigin: "144px 150px" }}>
         <rect
+          transform="rotate(28 144 150)"
           x="128"
           y="142"
           width="52"
@@ -177,6 +208,7 @@ export function Animal({
           strokeWidth="4"
         />
         <circle
+          transform="rotate(28 144 150)"
           cx="170"
           cy="158"
           r="13"

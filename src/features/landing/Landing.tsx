@@ -1,10 +1,11 @@
 import { SlideDeck } from "./SlideDeck";
+import { SocialIcon, type SocialName } from "./art/SocialIcon";
 import styles from "./landing.module.scss";
 
-const SOCIAL_LINKS = [
-  { label: "Discord", href: "#discord" },
-  { label: "OpenSea", href: "#opensea" },
-  { label: "Twitter", href: "#twitter" },
+const SOCIAL_LINKS: readonly { label: string; name: SocialName }[] = [
+  { label: "Discord", name: "discord" },
+  { label: "OpenSea", name: "opensea" },
+  { label: "Twitter", name: "twitter" },
 ];
 
 export function Landing() {
@@ -23,16 +24,16 @@ export function Landing() {
               <li key={link.label}>
                 <a
                   className={styles.social}
-                  href={link.href}
+                  href="#top"
                   aria-label={link.label}
                 >
-                  <span className={styles.socialDot} aria-hidden="true" />
+                  <SocialIcon name={link.name} />
                 </a>
               </li>
             ))}
           </ul>
 
-          <a className={styles.cta} href="#collection">
+          <a className={styles.cta} href="#top">
             <span className={styles.ctaShape} aria-hidden="true" />
             <span className={styles.ctaLabel}>view collection</span>
           </a>

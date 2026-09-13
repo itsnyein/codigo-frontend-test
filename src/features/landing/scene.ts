@@ -1,17 +1,6 @@
 import { ANIMAL_ASPECT, SPECIES, type Species } from "./art/Animal";
 import type { BandName } from "./motion";
 
-/**
- * Scene composition for reference states 0, 1 and 2.
- *
- * Measured from the live reference at 1564x784:
- *  - state 0: tiles cover the screen edge to edge, no background visible.
- *    Heads run roughly 15-25vw, heavily overlapped, saturated palette with
- *    real tonal range (black, white, yellow, green, red) rather than pastel.
- *  - state 1: cream field, 5-7 drifting blobs, no animals but the hero.
- *  - state 2: cream field, blobs, 12 animals in three depth bands.
- */
-
 export type Tone = "pale" | "soft" | "vivid" | "deep";
 
 export interface Palette {
@@ -77,12 +66,6 @@ export interface Placement {
   phase: number;
 }
 
-/**
- * Math.sin is not bit-identical between Node and V8, so raw noise differs in
- * its trailing digits between server and client render. Rounding every derived
- * number keeps the emitted markup deterministic and stops React discarding the
- * hydrated tree - which previously orphaned the nodes GSAP was animating.
- */
 const round = (value: number) => Math.round(value * 1000) / 1000;
 
 function noise(n: number): number {
@@ -225,8 +208,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     species: "panda",
     fur: "snow",
     tone: "pale",
-    x: 92,
-    y: 48,
+    x: 95,
+    y: 70,
     size: 10,
     rotate: 5,
     band: "far",
@@ -237,8 +220,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     species: "fox",
     fur: "apricot",
     tone: "vivid",
-    x: 72,
-    y: 62,
+    x: 62,
+    y: 86,
     size: 15,
     rotate: -8,
     band: "mid",
@@ -270,8 +253,8 @@ const STANDING_SEEDS: readonly Seed[] = [
     species: "rabbit",
     fur: "sky",
     tone: "soft",
-    x: 78,
-    y: 38,
+    x: 22,
+    y: 24,
     size: 13,
     rotate: 9,
     band: "mid",
@@ -334,11 +317,6 @@ export interface Blob {
   phase: number;
 }
 
-/**
- * State 1/2 background blobs. Measured from the reference: salmon and pale-blue
- * organic shapes hugging the edges, plus one navy shape behind the CTA. They
- * drift continuously while the hero holds station.
- */
 export const BLOBS: readonly Blob[] = [
   {
     x: 6,

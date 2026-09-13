@@ -10,16 +10,19 @@ import { useHeroRig } from "./useHeroRig";
 import { useIdleMotion } from "./useIdleMotion";
 import { usePreloader } from "./usePreloader";
 import { useSceneDirector } from "./useSceneDirector";
+import { useTextWave } from "./useTextWave";
 import styles from "./landing.module.scss";
 
 export function SlideDeck({ chrome }: { chrome: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   const [state, setState] = useState(0);
+  const [poseState, setPoseState] = useState(0);
 
   const { onObjectEnter, onObjectLeave } = useSceneDirector({
     root,
     sceneCount: SLIDES.length,
     onStateChange: setState,
+    onPoseChange: setPoseState,
   });
 
   const ready = usePreloader();
@@ -27,13 +30,13 @@ export function SlideDeck({ chrome }: { chrome: ReactNode }) {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  useHeroRig({ root, state, reduced });
+  useHeroRig({ root, state: poseState, reduced });
   useIdleMotion(root, reduced, state);
+  useTextWave(root, state === 2, reduced);
 
   return (
     <div ref={root} className={styles.root}>
       <div className={styles.stage} data-stage data-state={state}>
-        {}
         <div className={styles.blobLayer} data-blobs>
           <Props />
         </div>
@@ -53,8 +56,6 @@ export function SlideDeck({ chrome }: { chrome: ReactNode }) {
             />
           </div>
         ))}
-
-        {}
         <Hero />
 
         <h2 className={styles.wordmark} data-wordmark>
@@ -63,9 +64,9 @@ export function SlideDeck({ chrome }: { chrome: ReactNode }) {
         </h2>
 
         {SLIDES.map((slide, index) =>
-          slide.lines ? (
+          slide.paragraphs ? (
             <div key={slide.id} className={styles.copy} data-copy={index}>
-              <Typewriter lines={slide.lines} />
+              <Typewriter paragraphs={slide.paragraphs} />
             </div>
           ) : null,
         )}

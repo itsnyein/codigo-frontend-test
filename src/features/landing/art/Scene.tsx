@@ -22,7 +22,6 @@ export function Scene({
 
   return (
     <div className={styles.scene} aria-hidden="true">
-      {}
       {state === 0 ? (
         <span className={styles.crowdBackdrop} data-backdrop />
       ) : null}
@@ -54,12 +53,12 @@ export function Scene({
               } as CSSProperties
             }
           >
-            {}
             <span className={styles.hover} data-hover>
               <Animal
                 species={placement.species}
                 palette={placement.palette}
                 asleep={placement.asleep}
+                rigged
               />
             </span>
           </span>
