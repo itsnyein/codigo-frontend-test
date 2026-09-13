@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { useAppDispatch } from "@/store/hooks";
 import { loggedIn } from "./authSlice";
 import styles from "./auth.module.scss";
@@ -26,6 +28,8 @@ export function LoginForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  const [redirecting, setRedirecting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -35,18 +39,50 @@ export function LoginForm() {
     defaultValues: { username: "", password: "" },
   });
 
-  const onSubmit = handleSubmit((values) => {
-    dispatch(loggedIn(values.username));
-    router.push("/teams");
+  const onSubmit = handleSubmit(async (values) => {
+    const toastId = toast.loading("Signing in…");
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        toast.error("Wrong credentials", {
+          id: toastId,
+          description: "Check your name and password, then try again.",
+        });
+        return;
+      }
+
+      const { username } = (await response.json()) as { username: string };
+
+      setRedirecting(true);
+      toast.success(`Welcome back, ${username}`, {
+        id: toastId,
+        description: "Taking you to your teams…",
+      });
+
+      dispatch(loggedIn(username));
+      router.push("/teams");
+    } catch {
+      toast.error("Could not sign in right now", {
+        id: toastId,
+        description: "Please check your connection and try again.",
+      });
+    }
   });
+
+  const busy = isSubmitting || redirecting;
 
   return (
     <div className={styles.card}>
       <header className={styles.cardHeader}>
         <h1 className={styles.title}>Sign in</h1>
         <p className={styles.lead}>
-          Enter any name and password to continue - credentials are not sent
-          anywhere.
+          Demo credentials: <strong>admin</strong> / <strong>codigo2026</strong>
         </p>
       </header>
 
@@ -92,8 +128,20 @@ export function LoginForm() {
           ) : null}
         </div>
 
-        <button className={styles.submit} type="submit" disabled={isSubmitting}>
-          Sign in
+        <button
+          className={styles.submit}
+          type="submit"
+          disabled={busy}
+          aria-busy={busy}
+        >
+          {busy ? (
+            <>
+              <span className={styles.spinner} aria-hidden="true" />
+              {redirecting ? "Signing in…" : "Checking credentials…"}
+            </>
+          ) : (
+            "Sign in"
+          )}
         </button>
       </form>
     </div>

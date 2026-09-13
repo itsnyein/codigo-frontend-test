@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { publicEnv } from "@/lib/env.public";
 import {
@@ -47,14 +48,24 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
   const visible = players.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
   const loading = status === "loading";
 
-  const goNext = () => {
+  const goNext = async () => {
     const nextPage = page + 1;
-    if (nextPage >= pageCount && hasMore) {
-      fetchMore();
+
+    if (nextPage < pageCount) {
       setPage(nextPage);
       return;
     }
-    if (nextPage < pageCount) setPage(nextPage);
+
+    if (!hasMore) return;
+
+    try {
+      await dispatch(loadPlayers()).unwrap();
+      setPage(nextPage);
+    } catch {
+      toast.error("Couldn't load more players", {
+        description: "Check your connection, then try again.",
+      });
+    }
   };
 
   const teamsWithSpace = teams.filter(
@@ -82,10 +93,27 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
         <div className={styles.empty} role="alert">
           <p className={styles.emptyTitle}>Couldn&apos;t load players</p>
           <p className={styles.emptyBody}>{error}</p>
-          <button type="button" className={styles.buttonPrimary} onClick={fetchMore}>
+          <button
+            type="button"
+            className={styles.buttonPrimary}
+            onClick={fetchMore}
+          >
             Try again
           </button>
         </div>
+      ) : null}
+
+      {status === "failed" && players.length > 0 ? (
+        <p className={styles.inlineError} role="alert">
+          {error}{" "}
+          <button
+            type="button"
+            className={styles.retryLink}
+            onClick={fetchMore}
+          >
+            Retry
+          </button>
+        </p>
       ) : null}
 
       {loading && players.length === 0 ? (
@@ -130,9 +158,18 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
                       className={styles.select}
                       value=""
                       onChange={(event) => {
-                        if (!event.target.value) return;
-                        dispatch(
-                          playerAssigned({ teamId: event.target.value, player }),
+                        const teamId = event.target.value;
+                        if (!teamId) return;
+
+                        const target = teams.find(
+                          (candidate) => candidate.id === teamId,
+                        );
+                        dispatch(playerAssigned({ teamId, player }));
+                        toast.success(
+                          `${player.firstName} ${player.lastName} added`,
+                          target
+                            ? { description: `Now playing for ${target.name}.` }
+                            : undefined,
                         );
                       }}
                     >
@@ -162,7 +199,9 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
             Previous
           </button>
           <span className={styles.pageStatus}>
-            {loading ? "Loading…" : `${page + 1} / ${pageCount}${hasMore ? "+" : ""}`}
+            {loading
+              ? "Loading…"
+              : `${page + 1} / ${pageCount}${hasMore ? "+" : ""}`}
           </span>
           <button
             type="button"
