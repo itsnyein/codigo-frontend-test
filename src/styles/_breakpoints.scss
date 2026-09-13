@@ -17,3 +17,9 @@ $breakpoints: (
     @content;
   }
 }
+
+@mixin until($name) {
+  @media (max-width: breakpoint($name) - 0.02px) {
+    @content;
+  }
+}
