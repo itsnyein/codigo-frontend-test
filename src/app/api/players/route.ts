@@ -45,7 +45,10 @@ async function fetchUpstream(
   apiKey: string,
 ): Promise<PlayersPage> {
   const url = new URL(serverEnv.BALLDONTLIE_API_URL);
-  url.searchParams.set("per_page", String(publicEnv.NEXT_PUBLIC_PLAYERS_PAGE_SIZE));
+  url.searchParams.set(
+    "per_page",
+    String(publicEnv.NEXT_PUBLIC_PLAYERS_PAGE_SIZE),
+  );
   if (cursor > 0) url.searchParams.set("cursor", String(cursor));
 
   const response = await fetch(url, {
@@ -58,21 +61,22 @@ async function fetchUpstream(
   const payload = upstreamSchema.parse(await response.json());
 
   return {
-    players: payload.data.map(
-      (entry): Player => ({
-        id: entry.id,
-        firstName: entry.first_name,
-        lastName: entry.last_name,
-        position: entry.position,
-        nbaTeam: entry.team?.full_name ?? "Free agent",
-      }),
-    ),
+    players: payload.data.map((entry): Player => ({
+      id: entry.id,
+      firstName: entry.first_name,
+      lastName: entry.last_name,
+      position: entry.position,
+      nbaTeam: entry.team?.full_name ?? "Free agent",
+    })),
     nextCursor: payload.meta?.next_cursor ?? null,
   };
 }
 
 function readFixture(cursor: number): PlayersPage {
-  const players = FIXTURE_PLAYERS.slice(cursor, cursor + publicEnv.NEXT_PUBLIC_PLAYERS_PAGE_SIZE);
+  const players = FIXTURE_PLAYERS.slice(
+    cursor,
+    cursor + publicEnv.NEXT_PUBLIC_PLAYERS_PAGE_SIZE,
+  );
   const nextCursor = cursor + players.length;
 
   return {

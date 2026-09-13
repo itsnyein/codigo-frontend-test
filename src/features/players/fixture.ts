@@ -8,7 +8,12 @@ import type { Player } from "./types";
  * requires an API key. This fixture keeps the feature fully demonstrable when
  * no key is configured - see README.
  */
-type Seed = readonly [first: string, last: string, position: string, team: string];
+type Seed = readonly [
+  first: string,
+  last: string,
+  position: string,
+  team: string,
+];
 
 const SEEDS: readonly Seed[] = [
   ["Trae", "Young", "G", "Atlanta Hawks"],

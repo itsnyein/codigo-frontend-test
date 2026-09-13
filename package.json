@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -23,6 +25,7 @@
     "react-hook-form": "7.88.0",
     "react-redux": "9.3.0",
     "server-only": "^0.0.1",
+    "sonner": "^2.0.8",
     "zod": "4.6.2"
   },
   "devDependencies": {
@@ -36,8 +39,10 @@
     "@vitejs/plugin-react": "6.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "eslint-config-prettier": "^10.1.8",
     "husky": "9.1.7",
     "jsdom": "30.0.1",
+    "prettier": "^3.9.6",
     "sass": "1.104.1",
     "typescript": "^5",
     "vitest": "5.0.0"

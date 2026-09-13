@@ -9,7 +9,12 @@ import { teamsSlice } from "@/features/teams/teamsSlice";
 import { hydrationSlice } from "./hydration";
 import { statePersistence, type PersistedState } from "./persisted-state";
 
-const rootReducer = combineSlices(hydrationSlice, authSlice, teamsSlice, playersSlice);
+const rootReducer = combineSlices(
+  hydrationSlice,
+  authSlice,
+  teamsSlice,
+  playersSlice,
+);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
