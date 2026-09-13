@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { publicEnv } from "@/lib/env.public";
@@ -16,6 +16,7 @@ import {
   selectPlayers,
   selectPlayersError,
   selectPlayersStatus,
+  selectRetryAt,
 } from "./playersSlice";
 import styles from "@/features/teams/workspace.module.scss";
 
@@ -33,8 +34,12 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
   const status = useAppSelector(selectPlayersStatus);
   const error = useAppSelector(selectPlayersError);
   const hasMore = useAppSelector(selectHasMore);
+  const retryAt = useAppSelector(selectRetryAt);
+  const [now, setNow] = useState(() => Date.now());
 
   const loading = status === "loading";
+  const cooldown = retryAt ? Math.max(0, Math.ceil((retryAt - now) / 1000)) : 0;
+  const rateLimited = cooldown > 0;
 
   const fetchMore = useCallback(() => {
     void dispatch(loadPlayers());
@@ -44,15 +49,22 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
     if (players.length === 0) fetchMore();
   }, [players.length, fetchMore]);
 
+  useEffect(() => {
+    if (!retryAt) return;
+
+    const timer = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(timer);
+  }, [retryAt]);
+
   const loadMore = async () => {
     if (!hasMore || loading) return;
 
     try {
       await dispatch(loadPlayers()).unwrap();
     } catch (reason) {
-      toast.error(
-        typeof reason === "string" ? reason : "Couldn't load more players",
-      );
+      const detail = reason as { message?: string; retryAt?: number } | null;
+      if (detail?.retryAt) return;
+      toast.error(detail?.message ?? "Couldn't load more players");
     }
   };
 
@@ -87,7 +99,7 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
         </div>
       ) : null}
 
-      {status === "failed" && players.length > 0 ? (
+      {status === "failed" && players.length > 0 && !rateLimited ? (
         <p className={styles.inlineError} role="alert">
           {error}{" "}
           <button
@@ -179,9 +191,13 @@ export function PlayerList({ teams, assignments, rosters }: Props) {
               type="button"
               className={styles.buttonGhostSmall}
               onClick={loadMore}
-              disabled={loading}
+              disabled={loading || rateLimited}
             >
-              {loading ? "Loading…" : "Load more"}
+              {rateLimited
+                ? `API limit reached · ${cooldown}s`
+                : loading
+                  ? "Loading…"
+                  : "Load more"}
             </button>
           ) : (
             <span className={styles.pageStatus}>

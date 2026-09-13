@@ -44,7 +44,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     if (error instanceof RateLimited) {
       return Response.json(
         {
-          error: `The players API allows 5 requests per minute. Try again in about ${error.retryAfterSeconds}s.`,
+          error: "The players API allows 5 requests per minute.",
+          retryAfter: error.retryAfterSeconds,
         },
         {
           status: 429,

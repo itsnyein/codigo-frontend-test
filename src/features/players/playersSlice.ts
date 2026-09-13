@@ -9,6 +9,7 @@ export interface PlayersState {
   nextCursor: number | null;
   status: Status;
   error: string | null;
+  retryAt: number | null;
 }
 
 const initialState: PlayersState = {
@@ -16,12 +17,16 @@ const initialState: PlayersState = {
   nextCursor: 0,
   status: "idle",
   error: null,
+  retryAt: null,
 };
 
 export const loadPlayers = createAsyncThunk<
   PlayersPage,
   void,
-  { state: RootState; rejectValue: string }
+  {
+    state: RootState;
+    rejectValue: { message: string; retryAt: number | null };
+  }
 >(
   "players/load",
   async (_arg, { getState, signal, rejectWithValue }) => {
@@ -31,10 +36,12 @@ export const loadPlayers = createAsyncThunk<
     if (!response.ok) {
       const body = (await response.json().catch(() => null)) as {
         error?: string;
+        retryAfter?: number;
       } | null;
-      return rejectWithValue(
-        body?.error ?? "We couldn't load players. Please try again.",
-      );
+      return rejectWithValue({
+        message: body?.error ?? "We couldn't load players. Please try again.",
+        retryAt: body?.retryAfter ? Date.now() + body.retryAfter * 1000 : null,
+      });
     }
     return (await response.json()) as PlayersPage;
   },
@@ -55,6 +62,7 @@ export const playersSlice = createSlice({
       .addCase(loadPlayers.pending, (state) => {
         state.status = "loading";
         state.error = null;
+        state.retryAt = null;
       })
       .addCase(loadPlayers.fulfilled, (state, action) => {
         const known = new Set(state.items.map((player) => player.id));
@@ -67,13 +75,15 @@ export const playersSlice = createSlice({
       .addCase(loadPlayers.rejected, (state, action) => {
         if (action.meta.aborted || action.meta.condition) return;
         state.status = "failed";
-        state.error = action.payload ?? "Something went wrong.";
+        state.error = action.payload?.message ?? "Something went wrong.";
+        state.retryAt = action.payload?.retryAt ?? null;
       });
   },
   selectors: {
     selectPlayers: (state) => state.items,
     selectPlayersStatus: (state) => state.status,
     selectPlayersError: (state) => state.error,
+    selectRetryAt: (state) => state.retryAt,
     selectHasMore: (state) => state.nextCursor !== null,
   },
 });
@@ -82,5 +92,6 @@ export const {
   selectPlayers,
   selectPlayersStatus,
   selectPlayersError,
+  selectRetryAt,
   selectHasMore,
 } = playersSlice.selectors;
