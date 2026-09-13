@@ -66,7 +66,8 @@ export const teamsSlice = createSlice({
       state.order = state.order.filter((teamId) => teamId !== id);
 
       for (const [playerId, assignment] of Object.entries(state.assignments)) {
-        if (assignment.teamId === id) delete state.assignments[Number(playerId)];
+        if (assignment.teamId === id)
+          delete state.assignments[Number(playerId)];
       }
     },
 
@@ -106,8 +107,12 @@ export const teamsSlice = createSlice({
   },
 
   selectors: {
-    selectTeams: (state) =>
-      state.order.flatMap((id) => (state.teams[id] ? [state.teams[id]] : [])),
+    selectTeams: (state): Team[] =>
+      state.order.reduce<Team[]>((list, id) => {
+        const team = state.teams[id];
+        if (team) list.push(team);
+        return list;
+      }, []),
     selectAssignments: (state) => state.assignments,
     selectTeamCount: (state) => state.order.length,
   },
