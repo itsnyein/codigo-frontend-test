@@ -3,7 +3,6 @@
 $breakpoints: (
   tablet: 768px,
   desktop: 1024px,
-  wide: 1440px,
 );
 
 @function breakpoint($name) {
@@ -15,12 +14,6 @@ $breakpoints: (
 
 @mixin from($name) {
   @media (min-width: breakpoint($name)) {
-    @content;
-  }
-}
-
-@mixin until($name) {
-  @media (max-width: breakpoint($name) - 0.02px) {
     @content;
   }
 }
