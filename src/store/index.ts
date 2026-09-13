@@ -3,14 +3,17 @@ import {
   configureStore,
   createListenerMiddleware,
 } from "@reduxjs/toolkit";
+import { authSlice } from "@/features/auth/authSlice";
+import { playersSlice } from "@/features/players/playersSlice";
+import { teamsSlice } from "@/features/teams/teamsSlice";
 import { hydrationSlice } from "./hydration";
 import { statePersistence, type PersistedState } from "./persisted-state";
 
-const rootReducer = combineSlices(hydrationSlice);
+const rootReducer = combineSlices(hydrationSlice, authSlice, teamsSlice, playersSlice);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const PERSISTED_SLICE_KEYS: readonly (keyof RootState)[] = [];
+const PERSISTED_SLICE_KEYS: readonly (keyof RootState)[] = ["auth", "teams"];
 
 function selectPersistedState(state: RootState): PersistedState {
   return Object.fromEntries(
